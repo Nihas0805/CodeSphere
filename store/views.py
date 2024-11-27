@@ -34,7 +34,21 @@ from django.contrib.auth.models import User
 
 from decouple import config
 
+from twilio.rest import Client
+
 decs=[signin_required,never_cache]
+
+def send_text_message():
+    account_sid = config('TWILIO_ACCOUNT_SID')
+    auth_token = config('TWILIO_AUTH_TOKEN')
+    client = Client(account_sid, auth_token)
+    message = client.messages.create(
+    messaging_service_sid='MGf6cbeb77420eb2770cd2b66be77db8f8',
+    body='You have completed purchase from Codesphere',
+    to='+919048444482',
+)
+    print(message.sid)
+    
 
 def send_email():
 
@@ -342,7 +356,7 @@ class CheckOutView(View):
 
         return render(request,self.template_name,data)
 
-@method_decorator(decs,name="dispatch")
+# @method_decorator(decs,name="dispatch")
 @method_decorator(csrf_exempt,name='dispatch')
 class PaymentVerificationView(View):
 
@@ -366,6 +380,8 @@ class PaymentVerificationView(View):
 
             send_email()
 
+            send_text_message()
+
             print("success")
 
         except:
@@ -386,7 +402,7 @@ class MyordersView(View):
 
         return render(request,self.template_name,{"data":qs})
 
-
+@method_decorator(decs,name="dispatch")
 class PasswordResestView(View):
 
     template_name="password_reset.html"
